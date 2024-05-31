@@ -15,9 +15,9 @@ class Detection(QThread):
         self.video_capture = cv2.VideoCapture("/dev/v4l/by-id/usb-Foxlink_HP_Webcam_0x0001-video-index0")
         self.stopped = False
         self.frame_counter = 0
-        self.skip_frames = 5
+        self.skip_frames = 3
         self.last_detections = []
-        self.detection_lifetime = 4
+        self.detection_lifetime = 2
 
         # Añadir instancia de Logger
         self.logger = Logger("result inferences.txt")
