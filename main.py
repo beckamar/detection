@@ -6,8 +6,8 @@ from interface import Ui_MainWindow
 from detection import Detection
 import cv2
 from PyQt5 import uic
-import resources
 import json
+from PyQt5.QtCore import QThread, pyqtSignal, Qt
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
@@ -56,7 +56,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def update_image(self, image):
         qt_image = self.convert_cv_qt(image)
-        self.cameraFrame.setPixmap(qt_image)
+        self.cameraFrameLabel.setPixmap(qt_image)
 
     def convert_cv_qt(self, cv_img):
         """Convert from an OpenCV image to QPixmap"""
