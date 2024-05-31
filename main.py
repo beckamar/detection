@@ -7,9 +7,11 @@ from PyQt5.QtWidgets import QMainWindow, QApplication
 from interface import Ui_MainWindow  
 from detection import Detection
 import json
-from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+
+
+
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):

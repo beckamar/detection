@@ -1,3 +1,4 @@
+from logger import Logger
 import cv2
 import numpy as np
 from ultralytics import YOLO
@@ -18,6 +19,9 @@ class Detection(QThread):
         self.last_detections = []
         self.detection_lifetime = 4
 
+        # Añadir instancia de Logger
+        self.logger = Logger("result inferences.txt")
+
     def run(self):
         while not self.stopped:
             ret, frame = self.video_capture.read()
@@ -29,12 +33,16 @@ class Detection(QThread):
                     self.process_frame(frame, new_detection=False)
         self.video_capture.release()
 
+        # Guardar los resultados al detener el hilo
+        self.logger.save()
+
+
     def process_frame(self, frame, new_detection=True):
         if new_detection:
-            detection_results = self.yolo_model.predict(frame, imgsz=640, conf=0.75)
+            detection_results = self.yolo_model.predict(frame, imgsz=640, conf=0.5)
             self.last_detections = [(detection, self.detection_lifetime) for detection in detection_results]
         else:
-            self.last_detections = [(detection, life-1) for detection, life in self.last_detections if life > 0]
+           self.last_detections = [(detection, life-1) for detection, life in self.last_detections if life > 0]
 
         for detection_obj, life in self.last_detections:
             for box in detection_obj.boxes:
@@ -42,13 +50,14 @@ class Detection(QThread):
                 label_index = int(box.cls.item())
                 label = detection_obj.names[label_index]
                 confidence = box.conf.item() if isinstance(box.conf, torch.Tensor) else box.conf
-                
+
                 if label.lower() == 'rock':
                     rock_image = frame[int(y1):int(y2), int(x1):int(x2)]
                     rock_type = self.classify_rock_type(rock_image)
                     label = rock_type
 
                 text = f"{label}: {confidence:.2f}"
+                self.logger.log(text)  # Corregir el formato del mensaje
                 cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
                 text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
                 text_x = int(x1)
@@ -57,6 +66,7 @@ class Detection(QThread):
                 cv2.putText(frame, text, (text_x, text_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 2)
 
         self.ImageUpdate.emit(frame)
+
 
     def classify_rock_type(self, rock_image):
         rgb_image = cv2.cvtColor(rock_image, cv2.COLOR_BGR2RGB)
@@ -76,6 +86,7 @@ class Detection(QThread):
     def stop(self):
         self.stopped = True
         self.wait()
+        self.logger.save()  # guardar los resultados al detener
         cv2.destroyAllWindows()
 
 def convert_to_8bit(image):
