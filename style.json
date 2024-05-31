@@ -1,0 +1,60 @@
+{
+    "QMainWindow": [
+        {
+            "title": "MarsRover-Laboratory",
+            "icon": ":/logo.png",
+            "frameless": true,
+            "translucentBg": true,
+            "sizeGrip": "size_grip",
+            "shadow": [
+                {
+                    "color": "#fff",
+                    "blurRadius": 20,
+                    "xOffset": 0,
+                    "yOffset": 0,
+                    "centralWidget": "centralwidget"
+                }
+            ],
+            "navigation": [
+                {
+                    "minimize": "btnMinimize",
+                    "close": "btnClose",
+                    "restore": [
+                        {
+                            "buttonName": "btnRestore",
+                            "normalIcon": ":/icons/icons/square.svg",
+                            "maximizedIcon": ":/icons/icons/copy.svg"
+                        }
+                    ],
+                    "moveWindow": "header",
+                    "titleBar": "header"
+                },
+                {
+                    "navigationButtons": [
+                        {
+                            "homeBtn": "mainSection",
+                            "cameraBtn": "cameraSection",
+                            "sensorsBtn": "sensorSection"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "QPushButtonGroup": [
+        {
+            "Buttons": [
+                "homeBtn",
+                "cameraBtn",
+                "sensorsBtn",
+                "systemInfoBtn"
+            ],
+            "Style": [
+                {
+                    "Active": "background-color: #3E3E3E;",
+                    "NotActive": ""
+                }
+            ]
+        }
+    ]
+}
