@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+import rospy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
 from logger import Logger
 import cv2
 import numpy as np
@@ -12,26 +16,30 @@ class Detection(QThread):
         super().__init__()
         self.yolo_model = YOLO("best.pt")
         self.second_model = YOLO("kind.pt")
-        self.video_capture = cv2.VideoCapture("/dev/v4l/by-id/usb-Foxlink_HP_Webcam_0x0001-video-index0")
+        #self.video_capture = cv2.VideoCapture("/dev/v4l/by-id/usb-Foxlink_HP_Webcam_0x0001-video-index0")
         self.stopped = False
         self.frame_counter = 0
-        self.skip_frames = 3
+        self.skip_frames = 5
         self.last_detections = []
-        self.detection_lifetime = 2
-
+        self.detection_lifetime = 4
+        #Inicialización de ROS
+        rospy.init_node('LabCameraSubscriber', anonymous=True)
+        self.bridge = CvBridge()
+        rospy.Subscriber('lab_image', Image, self.callback)
         # Añadir instancia de Logger
         self.logger = Logger("result inferences.txt")
 
+    def callback(self, data):
+        # Convierte la imagen ROS a OpenCV para usarse en el objeto Detection para procesamiento
+            self.cv_image = self.bridge.imgmsg_to_cv2(data, 'bgr8')
+
     def run(self):
         while not self.stopped:
-            ret, frame = self.video_capture.read()
-            if ret:
-                self.frame_counter += 1
-                if self.frame_counter % self.skip_frames == 0:
-                    self.process_frame(frame, new_detection=True)
-                else:
-                    self.process_frame(frame, new_detection=False)
-        self.video_capture.release()
+            self.frame_counter += 1
+            if self.frame_counter % self.skip_frames == 0:
+                self.process_frame(self.cv_image, new_detection=True)
+            else:
+                self.process_frame(self.cv_image, new_detection=False)
 
         # Guardar los resultados al detener el hilo
         self.logger.save()
